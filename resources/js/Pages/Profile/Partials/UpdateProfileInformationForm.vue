@@ -14,11 +14,14 @@ defineProps({
     },
 });
 
-const user = usePage().props.auth.user;
+const page = usePage();
+const user = page.props.auth.user;
+const zonas = page.props.zonas;
 
 const form = useForm({
     name: user.name,
     email: user.email,
+    zona_id: user.zona_id,
 });
 </script>
 
@@ -40,7 +43,6 @@ const form = useForm({
         >
             <div>
                 <InputLabel for="name" value="Name" />
-
                 <TextInput
                     id="name"
                     type="text"
@@ -50,13 +52,11 @@ const form = useForm({
                     autofocus
                     autocomplete="name"
                 />
-
                 <InputError class="mt-2" :message="form.errors.name" />
             </div>
 
             <div>
                 <InputLabel for="email" value="Email" />
-
                 <TextInput
                     id="email"
                     type="email"
@@ -65,29 +65,28 @@ const form = useForm({
                     required
                     autocomplete="username"
                 />
-
                 <InputError class="mt-2" :message="form.errors.email" />
             </div>
 
-            <div v-if="mustVerifyEmail && user.email_verified_at === null">
-                <p class="mt-2 text-sm text-gray-800">
-                    Your email address is unverified.
-                    <Link
-                        :href="route('verification.send')"
-                        method="post"
-                        as="button"
-                        class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    >
-                        Click here to re-send the verification email.
-                    </Link>
-                </p>
-
-                <div
-                    v-show="status === 'verification-link-sent'"
-                    class="mt-2 text-sm font-medium text-green-600"
+            <!-- ZONA -->
+            <div>
+                <InputLabel for="zona_id" value="Zona" />
+                <select
+                    id="zona_id"
+                    name="zona_id"
+                    v-model="form.zona_id"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                 >
-                    A new verification link has been sent to your email address.
-                </div>
+                    <option value="">Seleccioná una zona</option>
+                    <option
+                        v-for="zona in zonas"
+                        :key="zona.id"
+                        :value="zona.id"
+                    >
+                        {{ zona.nombre }}
+                    </option>
+                </select>
+                <InputError class="mt-2" :message="form.errors.zona_id" />
             </div>
 
             <div class="flex items-center gap-4">
