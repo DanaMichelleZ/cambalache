@@ -69,4 +69,16 @@ class PublicacionController extends Controller
             'publicaciones' => $publicaciones,
         ]);
     }
+
+    /**
+     * Muestra una publicación específica.
+     */
+    public function show($id)
+    {
+        $publicacion = Publicacion::with(['imagenes', 'user.zona'])->findOrFail($id);
+
+        return Inertia::render('Publicaciones/Show', [
+            'publicacion' => $publicacion,
+        ]);
+    }
 }
