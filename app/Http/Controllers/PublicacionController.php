@@ -29,6 +29,8 @@ class PublicacionController extends Controller
             'descripcion' => 'nullable|string',
             'estado' => 'required|in:nuevo,usado,roto',
             'interes_trueque' => 'nullable|array',
+            'partido' => 'required|string|max:255',
+            'localidad' => 'required|string|max:255',
             'imagenes.*' => 'image|max:2048',
         ]);
 
@@ -39,6 +41,8 @@ class PublicacionController extends Controller
             'descripcion' => $data['descripcion'] ?? null,
             'estado' => $data['estado'],
             'interes_trueque' => $data['interes_trueque'] ?? [],
+            'partido' => $data['partido'],
+            'localidad' => $data['localidad'],
         ]);
 
         if ($request->hasFile('imagenes')) {

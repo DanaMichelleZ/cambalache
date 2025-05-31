@@ -1,13 +1,46 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
+import { ref, watch } from 'vue';
+import axios from 'axios';
 
 const form = useForm({
     titulo: '',
     descripcion: '',
     estado: 'usado',
     interes_trueque: [],
+    partido: '',
+    localidad: '',
     imagenes: [],
+});
+
+const partidos = ref([]);
+const localidades = ref([]);
+
+// Buscar partidos al cargar
+async function buscarPartidos() {
+    try {
+        const response = await axios.get('https://apis.datos.gob.ar/georef/api/departamentos?provincia=02&max=100');
+        partidos.value = response.data.departamentos.map(p => p.nombre);
+    } catch (error) {
+        console.error('Error obteniendo partidos:', error);
+        partidos.value = [];
+    }
+}
+buscarPartidos();
+
+// Cargar localidades según partido
+watch(() => form.partido, async (nuevoPartido) => {
+    form.localidad = '';
+    localidades.value = [];
+    if (!nuevoPartido) return;
+
+    try {
+        const response = await axios.get(`https://apis.datos.gob.ar/georef/api/localidades?departamento=${encodeURIComponent(nuevoPartido)}&provincia=02&max=100`);
+        localidades.value = response.data.localidades.map(l => l.nombre);
+    } catch (error) {
+        console.error('Error obteniendo localidades:', error);
+    }
 });
 
 function submit() {
@@ -57,6 +90,22 @@ function submit() {
                     </div>
 
                     <div>
+                        <label class="block text-sm font-medium text-gray-700">Partido</label>
+                        <select v-model="form.partido" class="mt-1 block w-full border-gray-300 rounded">
+                            <option disabled value="">Seleccione un partido</option>
+                            <option v-for="p in partidos" :key="p" :value="p">{{ p }}</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Localidad</label>
+                        <select v-model="form.localidad" class="mt-1 block w-full border-gray-300 rounded">
+                            <option disabled value="">Seleccione una localidad</option>
+                            <option v-for="l in localidades" :key="l" :value="l">{{ l }}</option>
+                        </select>
+                    </div>
+
+                    <div>
                         <label class="block text-sm font-medium text-gray-700">Imágenes</label>
                         <input type="file" multiple @change="form.imagenes = $event.target.files" />
                     </div>
@@ -64,7 +113,7 @@ function submit() {
                     <div>
                         <button
                             type="submit"
-                            class="px-4 py-2 bg-indigo-600 text-black rounded hover:bg-indigo-700"
+                            class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
                             :disabled="form.processing"
                         >
                             Publicar

@@ -21,11 +21,6 @@ Route::get('/inicio', [PublicacionController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('inicio');
 
-// Ruta de detalle de publicación (🆕 necesario para el botón "Ver más")
-Route::get('/publicaciones/{id}', [PublicacionController::class, 'show'])
-    ->middleware(['auth', 'verified'])
-    ->name('publicaciones.show');
-
 // Rutas protegidas por autenticación
 Route::middleware('auth')->group(function () {
 
@@ -37,6 +32,13 @@ Route::middleware('auth')->group(function () {
     // Publicaciones
     Route::get('/publicaciones/crear', [PublicacionController::class, 'create'])->name('publicaciones.create');
     Route::post('/publicaciones', [PublicacionController::class, 'store'])->name('publicaciones.store');
+
+    // Ruta de detalle de publicación (🆕 necesario para el botón "Ver más")
+        Route::get('/publicaciones/{id}', [PublicacionController::class, 'show'])
+        ->middleware(['auth', 'verified'])
+        ->name('publicaciones.show');
+
+
 });
 
 require __DIR__.'/auth.php';
