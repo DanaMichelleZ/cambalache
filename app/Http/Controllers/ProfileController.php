@@ -22,7 +22,7 @@ class ProfileController extends Controller
         return Inertia::render('Profile/Edit', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
-            'zonas' => Zona::all(['id', 'nombre']), // 👈 se pasa al frontend
+            'zonas' => Zona::all(['id', 'nombre']),
         ]);
     }
 
@@ -33,20 +33,17 @@ class ProfileController extends Controller
     {
         $data = $request->validated();
 
-        // Permitimos guardar zona_id si viene
-        if ($request->has('zona_id')) {
-            $request->user()->zona_id = $request->zona_id;
+        // Buscar zona_id por nombre (partido)
+        if ($request->filled('partido')) {
+            $zona = Zona::where('nombre', $request->partido)->first();
+            if ($zona) {
+                $data['zona_id'] = $zona->id;
+            }
         }
 
-        $request->user()->fill($data);
+        $request->user()->update($data);
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
-        }
-
-        $request->user()->save();
-
-        return Redirect::route('profile.edit');
+        return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
     /**
@@ -54,10 +51,6 @@ class ProfileController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        $request->validate([
-            'password' => ['required', 'current_password'],
-        ]);
-
         $user = $request->user();
 
         Auth::logout();

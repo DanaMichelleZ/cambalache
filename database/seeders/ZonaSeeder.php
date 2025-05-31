@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Zona;
+use Illuminate\Support\Str;
 
 class ZonaSeeder extends Seeder
 {
@@ -12,16 +13,44 @@ class ZonaSeeder extends Seeder
      */
     public function run(): void
     {
-        $zonas = [
-            ['nombre' => 'Palermo', 'tipo' => 'barrio', 'slug' => 'palermo'],
-            ['nombre' => 'Almagro', 'tipo' => 'barrio', 'slug' => 'almagro'],
-            ['nombre' => 'Caballito', 'tipo' => 'barrio', 'slug' => 'caballito'],
-            ['nombre' => 'Recoleta', 'tipo' => 'barrio', 'slug' => 'recoleta'],
-            ['nombre' => 'Villa Urquiza', 'tipo' => 'barrio', 'slug' => 'villa-urquiza'],
+        $barriosCABA = [
+            'Agronomía', 'Almagro', 'Balvanera', 'Barracas', 'Belgrano', 'Boedo',
+            'Caballito', 'Chacarita', 'Coghlan', 'Colegiales', 'Constitución',
+            'Flores', 'Floresta', 'La Boca', 'La Paternal', 'Liniers', 'Mataderos',
+            'Monserrat', 'Monte Castro', 'Nueva Pompeya', 'Núñez', 'Palermo',
+            'Parque Avellaneda', 'Parque Chacabuco', 'Parque Chas', 'Parque Patricios',
+            'Puerto Madero', 'Recoleta', 'Retiro', 'Saavedra', 'San Cristóbal',
+            'San Nicolás', 'San Telmo', 'Vélez Sarsfield', 'Versalles',
+            'Villa Crespo', 'Villa del Parque', 'Villa Devoto', 'Villa General Mitre',
+            'Villa Lugano', 'Villa Luro', 'Villa Ortúzar', 'Villa Pueyrredón',
+            'Villa Real', 'Villa Riachuelo', 'Villa Santa Rita', 'Villa Soldati',
+            'Villa Urquiza'
         ];
 
-        foreach ($zonas as $zona) {
-            Zona::create($zona);
+        $partidosAMBA = [
+            'Almirante Brown', 'Avellaneda', 'Berazategui', 'Berisso', 'Brandsen',
+            'Campana', 'Cañuelas', 'Ensenada', 'Escobar', 'Esteban Echeverría',
+            'Exaltación de la Cruz', 'Ezeiza', 'Florencio Varela', 'General Las Heras',
+            'General Rodríguez', 'General San Martín', 'Hurlingham', 'Ituzaingó',
+            'José C. Paz', 'La Matanza', 'La Plata', 'Lanús', 'Lomas de Zamora',
+            'Luján', 'Malvinas Argentinas', 'Marcos Paz', 'Merlo', 'Moreno', 'Morón',
+            'Pilar', 'Presidente Perón', 'Quilmes', 'San Fernando', 'San Isidro',
+            'San Miguel', 'San Vicente', 'Tigre', 'Tres de Febrero', 'Vicente López',
+            'Zárate'
+        ];
+
+        foreach ($barriosCABA as $barrio) {
+            Zona::updateOrCreate(
+                ['nombre' => $barrio, 'tipo' => 'CABA'],
+                ['slug' => Str::slug($barrio)]
+            );
+        }
+
+        foreach ($partidosAMBA as $partido) {
+            Zona::updateOrCreate(
+                ['nombre' => $partido, 'tipo' => 'AMBA'],
+                ['slug' => Str::slug($partido)]
+            );
         }
     }
 }

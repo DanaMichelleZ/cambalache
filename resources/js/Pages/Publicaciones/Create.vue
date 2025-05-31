@@ -1,14 +1,20 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import axios from 'axios';
+
+const props = defineProps({
+    userZona: String,
+    userPartido: String,
+});
 
 const form = useForm({
     titulo: '',
     descripcion: '',
     estado: 'usado',
     interes_trueque: [],
+    zonaGeneral: '',
     partido: '',
     localidad: '',
     imagenes: [],
@@ -17,31 +23,47 @@ const form = useForm({
 const partidos = ref([]);
 const localidades = ref([]);
 
-// Buscar partidos al cargar
-async function buscarPartidos() {
+// Precargar zona y partido del perfil
+onMounted(() => {
+    if (props.userZona) form.zonaGeneral = props.userZona;
+    if (props.userPartido) form.partido = props.userPartido;
+});
+
+// Cargar partidos según zona
+watch(() => form.zonaGeneral, async (zona) => {
+    form.partido = '';
+    form.localidad = '';
+    partidos.value = [];
+    localidades.value = [];
+
+    if (!zona) return;
+
+    const provincia = zona === 'CABA' ? '02' : 'Buenos Aires';
+
     try {
-        const response = await axios.get('https://apis.datos.gob.ar/georef/api/departamentos?provincia=02&max=100');
+        const response = await axios.get(`https://apis.datos.gob.ar/georef/api/departamentos?provincia=${provincia}&max=100`);
         partidos.value = response.data.departamentos.map(p => p.nombre);
     } catch (error) {
         console.error('Error obteniendo partidos:', error);
-        partidos.value = [];
     }
-}
-buscarPartidos();
+}, { immediate: true });
 
 // Cargar localidades según partido
 watch(() => form.partido, async (nuevoPartido) => {
     form.localidad = '';
     localidades.value = [];
-    if (!nuevoPartido) return;
+
+    if (!nuevoPartido || !form.zonaGeneral) return;
+
+    const provincia = form.zonaGeneral === 'CABA' ? '02' : 'Buenos Aires';
 
     try {
-        const response = await axios.get(`https://apis.datos.gob.ar/georef/api/localidades?departamento=${encodeURIComponent(nuevoPartido)}&provincia=02&max=100`);
+        const response = await axios.get(`https://apis.datos.gob.ar/georef/api/localidades?departamento=${encodeURIComponent(nuevoPartido)}&provincia=${provincia}&max=100`);
         localidades.value = response.data.localidades.map(l => l.nombre);
     } catch (error) {
         console.error('Error obteniendo localidades:', error);
     }
-});
+}, { immediate: true });
 
 function submit() {
     form.post(route('publicaciones.store'), {
@@ -90,6 +112,15 @@ function submit() {
                     </div>
 
                     <div>
+                        <label class="block text-sm font-medium text-gray-700">Zona</label>
+                        <select v-model="form.zonaGeneral" class="mt-1 block w-full border-gray-300 rounded">
+                            <option disabled value="">Seleccione una zona</option>
+                            <option value="CABA">CABA</option>
+                            <option value="AMBA">AMBA</option>
+                        </select>
+                    </div>
+
+                    <div>
                         <label class="block text-sm font-medium text-gray-700">Partido</label>
                         <select v-model="form.partido" class="mt-1 block w-full border-gray-300 rounded">
                             <option disabled value="">Seleccione un partido</option>
@@ -111,11 +142,7 @@ function submit() {
                     </div>
 
                     <div>
-                        <button
-                            type="submit"
-                            class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
-                            :disabled="form.processing"
-                        >
+                        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700" :disabled="form.processing">
                             Publicar
                         </button>
                     </div>

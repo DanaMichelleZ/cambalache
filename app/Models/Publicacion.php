@@ -15,6 +15,9 @@ class Publicacion extends Model
     protected $fillable = [
         'user_id',
         'zona_id',
+        'zona',         
+        'partido',      
+        'localidad',    
         'titulo',
         'descripcion',
         'estado',
@@ -36,8 +39,7 @@ class Publicacion extends Model
     }
 
     public function imagenes()
-{
-    return $this->hasMany(ImagenPublicacion::class);
-}
-
+    {
+        return $this->hasMany(ImagenPublicacion::class);
+    }
 }
