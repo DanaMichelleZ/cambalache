@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicacionController;
+use App\Http\Controllers\NotificacionController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -33,12 +34,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/publicaciones/crear', [PublicacionController::class, 'create'])->name('publicaciones.create');
     Route::post('/publicaciones', [PublicacionController::class, 'store'])->name('publicaciones.store');
 
-    // Ruta de detalle de publicación (🆕 necesario para el botón "Ver más")
-        Route::get('/publicaciones/{id}', [PublicacionController::class, 'show'])
+    // Ruta de detalle de publicación
+    Route::get('/publicaciones/{id}', [PublicacionController::class, 'show'])
         ->middleware(['auth', 'verified'])
         ->name('publicaciones.show');
 
-
+    // Notificaciones
+    Route::get('/notificaciones', [NotificacionController::class, 'index'])->name('notificaciones.index');
+    Route::post('/notificaciones', [NotificacionController::class, 'store'])->name('notificaciones.store'); // 🆕 ESTA LÍNEA
 });
 
 require __DIR__.'/auth.php';

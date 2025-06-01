@@ -1,10 +1,42 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage, router } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
-defineProps({
+const props = defineProps({
     publicacion: Object,
 });
+
+// Usuario actual
+const user = usePage().props.auth.user;
+
+// Determinar si el post es de otro usuario
+const esDeOtroUsuario = computed(() => {
+    return user && user.id !== props.publicacion.user.id;
+});
+
+// Función para construir la URL de la imagen
+function getImagenUrl(ruta) {
+    if (ruta === 'images/remera.png') {
+        return '/images/remera.png';
+    }
+    return `/storage/${ruta.replace('public/', '')}`;
+}
+
+// Función para enviar solicitud de trueque
+function enviarSolicitud() {
+    router.post('/notificaciones', {
+        user_id: props.publicacion.user.id,
+        publicacion_id: props.publicacion.id,
+    }, {
+        onSuccess: () => {
+            alert('Solicitud de trueque enviada.');
+        },
+        onError: () => {
+            alert('Error al enviar la solicitud.');
+        }
+    });
+}
 </script>
 
 <template>
@@ -44,17 +76,17 @@ defineProps({
                         {{ item }}<span v-if="index < publicacion.interes_trueque.length - 1">, </span>
                     </span>
                 </p>
+
+                <!-- Botón de solicitud -->
+                <div v-if="esDeOtroUsuario" class="mt-6">
+                    <button
+                        @click="enviarSolicitud"
+                        class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+                    >
+                        Enviar solicitud de trueque
+                    </button>
+                </div>
             </div>
         </div>
     </AuthenticatedLayout>
 </template>
-
-<script>
-
-function getImagenUrl(ruta) {
-    if (ruta === 'images/remera.png') {
-        return '/images/remera.png';
-    }
-    return `/storage/${ruta.replace('public/', '')}`;
-}
-</script>

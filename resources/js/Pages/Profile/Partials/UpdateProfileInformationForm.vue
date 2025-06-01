@@ -13,27 +13,13 @@ const user = page.props.auth.user;
 const form = useForm({
     name: user.name,
     email: user.email,
-    zona_tipo: '',   // CABA o AMBA
-    partido: '',     // nombre del partido seleccionado
+    zona_tipo: user.zona?.tipo || '',
+    partido: user.partido || '',
 });
 
 const partidos = ref([]);
 
-// Detectar zona inicial del usuario
-onMounted(() => {
-    const zonaNombre = user.zona?.nombre;
-    if (zonaNombre) {
-        if (zonaNombre.startsWith('Comuna')) {
-            form.zona_tipo = 'CABA';
-        } else {
-            form.zona_tipo = 'AMBA';
-        }
-        form.partido = zonaNombre;
-        buscarPartidos(form.zona_tipo);
-    }
-});
-
-// Buscar partidos según la zona seleccionada
+// Cargar partidos según la zona
 async function buscarPartidos(zonaTipo) {
     partidos.value = [];
 
@@ -49,6 +35,10 @@ async function buscarPartidos(zonaTipo) {
         console.error('Error obteniendo partidos:', err);
     }
 }
+
+onMounted(() => {
+    if (form.zona_tipo) buscarPartidos(form.zona_tipo);
+});
 
 watch(() => form.zona_tipo, (nuevaZona) => {
     form.partido = '';
@@ -67,6 +57,7 @@ function submit() {
             <p class="mt-1 text-sm text-gray-600">Actualizá tu nombre, email y zona.</p>
         </header>
 
+        <!-- FORMULARIO -->
         <form @submit.prevent="submit" class="mt-6 space-y-6">
             <div>
                 <InputLabel for="name" value="Nombre" />
@@ -80,7 +71,6 @@ function submit() {
                 <InputError class="mt-2" :message="form.errors.email" />
             </div>
 
-            <!-- ✅ Zona con id correctamente referenciado -->
             <div>
                 <InputLabel for="zona_tipo" value="Zona" />
                 <select id="zona_tipo" v-model="form.zona_tipo" class="mt-1 block w-full rounded border-gray-300">
@@ -91,11 +81,13 @@ function submit() {
                 <InputError class="mt-2" :message="form.errors.zona_tipo" />
             </div>
 
-            <!-- ✅ Partido con id correctamente referenciado -->
-            <div>
-                <InputLabel for="partido" value="Partido" />
+            <div v-if="form.zona_tipo">
+                <InputLabel
+                    for="partido"
+                    :value="form.zona_tipo === 'CABA' ? 'Barrio' : 'Partido'"
+                />
                 <select id="partido" v-model="form.partido" class="mt-1 block w-full rounded border-gray-300">
-                    <option disabled value="">Seleccioná un partido</option>
+                    <option disabled value="">Seleccioná una opción</option>
                     <option v-for="p in partidos" :key="p" :value="p">{{ p }}</option>
                 </select>
                 <InputError class="mt-2" :message="form.errors.partido" />

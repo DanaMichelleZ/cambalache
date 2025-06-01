@@ -16,12 +16,10 @@ const form = useForm({
     interes_trueque: [],
     zonaGeneral: '',
     partido: '',
-    localidad: '',
     imagenes: [],
 });
 
 const partidos = ref([]);
-const localidades = ref([]);
 
 // Precargar zona y partido del perfil
 onMounted(() => {
@@ -32,9 +30,7 @@ onMounted(() => {
 // Cargar partidos según zona
 watch(() => form.zonaGeneral, async (zona) => {
     form.partido = '';
-    form.localidad = '';
     partidos.value = [];
-    localidades.value = [];
 
     if (!zona) return;
 
@@ -45,23 +41,6 @@ watch(() => form.zonaGeneral, async (zona) => {
         partidos.value = response.data.departamentos.map(p => p.nombre);
     } catch (error) {
         console.error('Error obteniendo partidos:', error);
-    }
-}, { immediate: true });
-
-// Cargar localidades según partido
-watch(() => form.partido, async (nuevoPartido) => {
-    form.localidad = '';
-    localidades.value = [];
-
-    if (!nuevoPartido || !form.zonaGeneral) return;
-
-    const provincia = form.zonaGeneral === 'CABA' ? '02' : 'Buenos Aires';
-
-    try {
-        const response = await axios.get(`https://apis.datos.gob.ar/georef/api/localidades?departamento=${encodeURIComponent(nuevoPartido)}&provincia=${provincia}&max=100`);
-        localidades.value = response.data.localidades.map(l => l.nombre);
-    } catch (error) {
-        console.error('Error obteniendo localidades:', error);
     }
 }, { immediate: true });
 
@@ -125,14 +104,6 @@ function submit() {
                         <select v-model="form.partido" class="mt-1 block w-full border-gray-300 rounded">
                             <option disabled value="">Seleccione un partido</option>
                             <option v-for="p in partidos" :key="p" :value="p">{{ p }}</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Localidad</label>
-                        <select v-model="form.localidad" class="mt-1 block w-full border-gray-300 rounded">
-                            <option disabled value="">Seleccione una localidad</option>
-                            <option v-for="l in localidades" :key="l" :value="l">{{ l }}</option>
                         </select>
                     </div>
 

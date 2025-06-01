@@ -20,7 +20,7 @@ class ZonaSeeder extends Seeder
             'Monserrat', 'Monte Castro', 'Nueva Pompeya', 'Núñez', 'Palermo',
             'Parque Avellaneda', 'Parque Chacabuco', 'Parque Chas', 'Parque Patricios',
             'Puerto Madero', 'Recoleta', 'Retiro', 'Saavedra', 'San Cristóbal',
-            'San Nicolás', 'San Telmo', 'Vélez Sarsfield', 'Versalles',
+            'San Nicolás', 'San Telmo', 'Vélez Sársfield', 'Versalles',
             'Villa Crespo', 'Villa del Parque', 'Villa Devoto', 'Villa General Mitre',
             'Villa Lugano', 'Villa Luro', 'Villa Ortúzar', 'Villa Pueyrredón',
             'Villa Real', 'Villa Riachuelo', 'Villa Santa Rita', 'Villa Soldati',
@@ -29,11 +29,10 @@ class ZonaSeeder extends Seeder
 
         $partidosAMBA = [
             'Almirante Brown', 'Avellaneda', 'Berazategui', 'Berisso', 'Brandsen',
-            'Campana', 'Cañuelas', 'Ensenada', 'Escobar', 'Esteban Echeverría',
-            'Exaltación de la Cruz', 'Ezeiza', 'Florencio Varela', 'General Las Heras',
-            'General Rodríguez', 'General San Martín', 'Hurlingham', 'Ituzaingó',
-            'José C. Paz', 'La Matanza', 'La Plata', 'Lanús', 'Lomas de Zamora',
-            'Luján', 'Malvinas Argentinas', 'Marcos Paz', 'Merlo', 'Moreno', 'Morón',
+            'Cañuelas', 'Campana', 'Ensenada', 'Escobar', 'Esteban Echeverría',
+            'Ezeiza', 'Florencio Varela', 'Gral. San Martín', 'Hurlingham', 'Ituzaingó',
+            'José C. Paz', 'La Matanza', 'Lanús', 'Lomas de Zamora', 'Luján',
+            'Malvinas Argentinas', 'Marcos Paz', 'Merlo', 'Moreno', 'Morón',
             'Pilar', 'Presidente Perón', 'Quilmes', 'San Fernando', 'San Isidro',
             'San Miguel', 'San Vicente', 'Tigre', 'Tres de Febrero', 'Vicente López',
             'Zárate'

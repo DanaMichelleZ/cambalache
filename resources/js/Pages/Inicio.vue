@@ -44,9 +44,7 @@ function getImagenUrl(publicacion) {
                             class="w-full h-48 object-cover rounded mb-2"
                         />
                         <h3 class="text-lg font-bold">{{ publicacion.titulo }}</h3>
-                        <p class="text-sm text-gray-600 mb-1">Estado: {{ publicacion.estado }}</p>
                         <p class="text-sm text-gray-700 mb-1">{{ publicacion.descripcion }}</p>
-                        <p class="text-xs text-gray-500">Zona: {{ publicacion.user.zona.nombre }}</p>
                         <p class="text-xs text-gray-500">Publicado por: {{ publicacion.user.name }}</p>
 
                         <Link

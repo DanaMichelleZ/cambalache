@@ -2,64 +2,58 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProfileUpdateRequest;
-use App\Models\Zona;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\Zona;
 
 class ProfileController extends Controller
 {
-    /**
-     * Display the user's profile form.
-     */
     public function edit(Request $request): Response
     {
+        $user = $request->user()->load('zona');
+
         return Inertia::render('Profile/Edit', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
+            'mustVerifyEmail' => $user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail,
             'status' => session('status'),
-            'zonas' => Zona::all(['id', 'nombre']),
+            'user' => [
+                'name' => $user->name,
+                'email' => $user->email,
+                'zona_nombre' => $user->zona?->nombre,
+                'tipo_zona' => $user->zona?->tipo,
+                'partido' => $user->partido,
+            ],
         ]);
     }
 
-    /**
-     * Update the user's profile information.
-     */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(Request $request)
     {
-        $data = $request->validated();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
 
-        // Buscar zona_id por nombre (partido)
-        if ($request->filled('partido')) {
-            $zona = Zona::where('nombre', $request->partido)->first();
-            if ($zona) {
-                $data['zona_id'] = $zona->id;
-            }
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'zona_tipo' => 'required|in:CABA,AMBA',
+            'partido' => 'required|string|max:255',
+        ]);
+
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        $user->partido = $validated['partido'];
+
+        // Buscar zona por nombre y tipo
+        $zona = Zona::where('nombre', $validated['partido'])
+            ->where('tipo', $validated['zona_tipo'])
+            ->first();
+
+        if ($zona) {
+            $user->zona_id = $zona->id;
         }
 
-        $request->user()->update($data);
+        $user->save();
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
-    }
-
-    /**
-     * Delete the user's account.
-     */
-    public function destroy(Request $request): RedirectResponse
-    {
-        $user = $request->user();
-
-        Auth::logout();
-
-        $user->delete();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return Redirect::to('/');
+        return back()->with('status', 'profile-updated');
     }
 }

@@ -14,19 +14,18 @@ class PublicacionController extends Controller
     public function create()
     {
         $zona = Auth::user()->zona;
-    
+
         $tipoZona = null;
         if ($zona && in_array($zona->tipo, ['AMBA', 'CABA'])) {
             $tipoZona = $zona->tipo;
         }
-    
+
         return Inertia::render('Publicaciones/Create', [
             'userZona' => $tipoZona,
             'userPartido' => $zona?->nombre,
         ]);
     }
-    
-    
+
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -36,21 +35,26 @@ class PublicacionController extends Controller
             'interes_trueque' => 'nullable|array',
             'zonaGeneral' => 'required|string|in:CABA,AMBA',
             'partido' => 'required|string|max:255',
-            'localidad' => 'required|string|max:255',
             'imagenes.*' => 'image|max:2048',
         ]);
 
-        $publicacion = Publicacion::create([
+        // Armar los datos de la publicación
+        $publicacionData = [
             'user_id' => Auth::id(),
-            'zona_id' => Auth::user()->zona_id,
-            'zona' => $data['zonaGeneral'],
+            'zona' => $data['zonaGeneral'], // textual: CABA o AMBA
             'titulo' => $data['titulo'],
             'descripcion' => $data['descripcion'] ?? null,
             'estado' => $data['estado'],
             'interes_trueque' => $data['interes_trueque'] ?? [],
             'partido' => $data['partido'],
-            'localidad' => $data['localidad'],
-        ]);
+        ];
+
+        // Solo incluir zona_id si el usuario tiene una zona asignada
+        if (Auth::user()->zona_id !== null) {
+            $publicacionData['zona_id'] = Auth::user()->zona_id;
+        }
+
+        $publicacion = Publicacion::create($publicacionData);
 
         if ($request->hasFile('imagenes')) {
             foreach ($request->file('imagenes') as $imagen) {
@@ -66,7 +70,6 @@ class PublicacionController extends Controller
         return redirect()->route('inicio')->with('success', 'Publicación creada correctamente.');
     }
 
-
     public function index()
     {
         $publicaciones = Publicacion::with(['imagenes', 'user.zona'])
@@ -78,7 +81,6 @@ class PublicacionController extends Controller
             'publicaciones' => $publicaciones,
         ]);
     }
-
 
     public function show($id)
     {
