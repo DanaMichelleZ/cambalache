@@ -11,17 +11,22 @@ use Inertia\Inertia;
 
 class PublicacionController extends Controller
 {
-    /**
-     * Muestra el formulario para crear una publicación.
-     */
     public function create()
     {
-        return inertia('Publicaciones/Create');
+        $zona = Auth::user()->zona;
+    
+        $tipoZona = null;
+        if ($zona && in_array($zona->tipo, ['AMBA', 'CABA'])) {
+            $tipoZona = $zona->tipo;
+        }
+    
+        return Inertia::render('Publicaciones/Create', [
+            'userZona' => $tipoZona,
+            'userPartido' => $zona?->nombre,
+        ]);
     }
-
-    /**
-     * Guarda una nueva publicación.
-     */
+    
+    
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -29,6 +34,7 @@ class PublicacionController extends Controller
             'descripcion' => 'nullable|string',
             'estado' => 'required|in:nuevo,usado,roto',
             'interes_trueque' => 'nullable|array',
+            'zonaGeneral' => 'required|string|in:CABA,AMBA',
             'partido' => 'required|string|max:255',
             'localidad' => 'required|string|max:255',
             'imagenes.*' => 'image|max:2048',
@@ -37,6 +43,7 @@ class PublicacionController extends Controller
         $publicacion = Publicacion::create([
             'user_id' => Auth::id(),
             'zona_id' => Auth::user()->zona_id,
+            'zona' => $data['zonaGeneral'],
             'titulo' => $data['titulo'],
             'descripcion' => $data['descripcion'] ?? null,
             'estado' => $data['estado'],
@@ -59,9 +66,7 @@ class PublicacionController extends Controller
         return redirect()->route('inicio')->with('success', 'Publicación creada correctamente.');
     }
 
-    /**
-     * Muestra publicaciones públicas (de todos los usuarios) para la vista de inicio.
-     */
+
     public function index()
     {
         $publicaciones = Publicacion::with(['imagenes', 'user.zona'])
@@ -74,9 +79,7 @@ class PublicacionController extends Controller
         ]);
     }
 
-    /**
-     * Muestra una publicación específica.
-     */
+
     public function show($id)
     {
         $publicacion = Publicacion::with(['imagenes', 'user.zona'])->findOrFail($id);

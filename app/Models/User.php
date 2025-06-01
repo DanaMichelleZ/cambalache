@@ -47,4 +47,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Publicacion::class);
     }
+
+    /**
+     * Devuelve el nombre de la zona, si está relacionada.
+     */
+    public function getZonaNombreAttribute()
+    {
+        return $this->zona ? $this->zona->nombre : null;
+    }
 }
