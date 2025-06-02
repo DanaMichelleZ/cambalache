@@ -13,12 +13,20 @@ class NotificacionController extends Controller
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'publicacion_id' => 'required|exists:publicaciones,id', // ✅ corregido aquí
+            'publicacion_id' => 'required|exists:publicaciones,id',
         ]);
 
+        $yaExiste = Notificacion::where('from_user_id', Auth::id())
+            ->where('publicacion_id', $request->publicacion_id)
+            ->exists();
+
+        if ($yaExiste) {
+            return back()->with('success', 'Ya enviaste una solicitud para esta publicación.');
+        }
+
         Notificacion::create([
-            'user_id' => $request->user_id, // El dueño de la publicación
-            'from_user_id' => Auth::id(), // El que envía la solicitud
+            'user_id' => $request->user_id,
+            'from_user_id' => Auth::id(),
             'publicacion_id' => $request->publicacion_id,
             'mensaje' => 'Te enviaron una solicitud de trueque.',
         ]);

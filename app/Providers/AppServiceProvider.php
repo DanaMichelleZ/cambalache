@@ -21,11 +21,9 @@ class AppServiceProvider extends ServiceProvider
 
         Inertia::share('auth', function () {
             $user = Auth::user();
-
-            if (!$user) {
-                return ['user' => null];
-            }
-
+        
+            if (!$user) return ['user' => null];
+        
             return [
                 'user' => [
                     'id' => $user->id,
@@ -37,5 +35,6 @@ class AppServiceProvider extends ServiceProvider
                 ]
             ];
         });
+        
     }
 }

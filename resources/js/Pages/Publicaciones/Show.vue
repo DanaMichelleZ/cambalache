@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, usePage, router } from '@inertiajs/vue3';
-import { computed, ref, onMounted, watch } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 
 const props = defineProps({
     publicacion: Object,
@@ -10,27 +10,16 @@ const props = defineProps({
 const page = usePage();
 const user = page.props.auth.user;
 const flash = page.props.flash;
-const toast = ref(null);
 
-// Mostrar toast al éxito
+const toast = ref(null);
+const enviado = ref(false); // 🟢 Marca si ya fue enviada
+
 onMounted(() => {
     if (flash.success) {
         toast.value = flash.success;
-        setTimeout(() => toast.value = null, 3000);
+        enviado.value = flash.success.includes('Ya enviaste') || flash.success.includes('Solicitud enviada');
+        setTimeout(() => (toast.value = null), 3000);
     }
-});
-
-// Verifica si ya se envió una solicitud
-const yaEnviada = ref(false);
-
-const actualizarEstadoSolicitud = () => {
-    const notificaciones = page.props.auth.user?.notificaciones_enviadas ?? [];
-    yaEnviada.value = notificaciones.includes(props.publicacion.id);
-};
-
-// Inicializa estado de solicitud
-onMounted(() => {
-    actualizarEstadoSolicitud();
 });
 
 const esDeOtroUsuario = computed(() => {
@@ -49,18 +38,13 @@ function enviarSolicitud() {
     }, {
         preserveScroll: true,
         onSuccess: () => {
-            router.reload({
-                only: ['auth'],
-                onSuccess: () => {
-                    actualizarEstadoSolicitud();
-                    toast.value = 'Solicitud enviada.';
-                    setTimeout(() => toast.value = null, 3000);
-                },
-            });
+            enviado.value = true;
+            toast.value = 'Solicitud enviada.';
+            setTimeout(() => (toast.value = null), 3000);
         },
         onError: () => {
             toast.value = 'Error al enviar la solicitud.';
-            setTimeout(() => toast.value = null, 3000);
+            setTimeout(() => (toast.value = null), 3000);
         }
     });
 }
@@ -109,15 +93,15 @@ function enviarSolicitud() {
                     </span>
                 </p>
 
-                <!-- Botón -->
+                <!-- Botón de solicitud -->
                 <div v-if="esDeOtroUsuario" class="mt-6">
                     <button
-                        :disabled="yaEnviada"
                         @click="enviarSolicitud"
-                        class="px-4 py-2 rounded text-white font-semibold"
-                        :class="yaEnviada ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'"
+                        :disabled="enviado"
+                        class="px-4 py-2 rounded font-semibold text-white"
+                        :class="enviado ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'"
                     >
-                        {{ yaEnviada ? 'Solicitud enviada' : 'Enviar solicitud de trueque' }}
+                        {{ enviado ? 'Solicitud enviada' : 'Enviar solicitud de trueque' }}
                     </button>
                 </div>
             </div>
