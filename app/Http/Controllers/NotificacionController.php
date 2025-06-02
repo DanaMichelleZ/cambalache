@@ -13,7 +13,7 @@ class NotificacionController extends Controller
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'publicacion_id' => 'required|exists:publicacions,id',
+            'publicacion_id' => 'required|exists:publicaciones,id', // ✅ corregido aquí
         ]);
 
         Notificacion::create([

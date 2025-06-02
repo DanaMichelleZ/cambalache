@@ -1,39 +1,66 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, usePage, router } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref, onMounted, watch } from 'vue';
 
 const props = defineProps({
     publicacion: Object,
 });
 
-// Usuario actual
-const user = usePage().props.auth.user;
+const page = usePage();
+const user = page.props.auth.user;
+const flash = page.props.flash;
+const toast = ref(null);
 
-// Determinar si el post es de otro usuario
+// Mostrar toast al éxito
+onMounted(() => {
+    if (flash.success) {
+        toast.value = flash.success;
+        setTimeout(() => toast.value = null, 3000);
+    }
+});
+
+// Verifica si ya se envió una solicitud
+const yaEnviada = ref(false);
+
+const actualizarEstadoSolicitud = () => {
+    const notificaciones = page.props.auth.user?.notificaciones_enviadas ?? [];
+    yaEnviada.value = notificaciones.includes(props.publicacion.id);
+};
+
+// Inicializa estado de solicitud
+onMounted(() => {
+    actualizarEstadoSolicitud();
+});
+
 const esDeOtroUsuario = computed(() => {
     return user && user.id !== props.publicacion.user.id;
 });
 
-// Función para construir la URL de la imagen
 function getImagenUrl(ruta) {
-    if (ruta === 'images/remera.png') {
-        return '/images/remera.png';
-    }
+    if (ruta === 'images/remera.png') return '/images/remera.png';
     return `/storage/${ruta.replace('public/', '')}`;
 }
 
-// Función para enviar solicitud de trueque
 function enviarSolicitud() {
     router.post('/notificaciones', {
         user_id: props.publicacion.user.id,
         publicacion_id: props.publicacion.id,
     }, {
+        preserveScroll: true,
         onSuccess: () => {
-            alert('Solicitud de trueque enviada.');
+            router.reload({
+                only: ['auth'],
+                onSuccess: () => {
+                    actualizarEstadoSolicitud();
+                    toast.value = 'Solicitud enviada.';
+                    setTimeout(() => toast.value = null, 3000);
+                },
+            });
         },
         onError: () => {
-            alert('Error al enviar la solicitud.');
+            toast.value = 'Error al enviar la solicitud.';
+            setTimeout(() => toast.value = null, 3000);
         }
     });
 }
@@ -48,6 +75,11 @@ function enviarSolicitud() {
                 {{ publicacion.titulo }}
             </h2>
         </template>
+
+        <!-- Toast -->
+        <div v-if="toast" class="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow z-50">
+            {{ toast }}
+        </div>
 
         <div class="py-12">
             <div class="mx-auto max-w-3xl sm:px-6 lg:px-8 bg-white p-6 rounded shadow">
@@ -77,13 +109,15 @@ function enviarSolicitud() {
                     </span>
                 </p>
 
-                <!-- Botón de solicitud -->
+                <!-- Botón -->
                 <div v-if="esDeOtroUsuario" class="mt-6">
                     <button
+                        :disabled="yaEnviada"
                         @click="enviarSolicitud"
-                        class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+                        class="px-4 py-2 rounded text-white font-semibold"
+                        :class="yaEnviada ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'"
                     >
-                        Enviar solicitud de trueque
+                        {{ yaEnviada ? 'Solicitud enviada' : 'Enviar solicitud de trueque' }}
                     </button>
                 </div>
             </div>
