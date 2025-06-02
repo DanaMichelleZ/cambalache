@@ -12,7 +12,7 @@ const user = page.props.auth.user;
 const flash = page.props.flash;
 
 const toast = ref(null);
-const enviado = ref(false); // 🟢 Marca si ya fue enviada
+const enviado = ref(false);
 
 onMounted(() => {
     if (flash.success) {
