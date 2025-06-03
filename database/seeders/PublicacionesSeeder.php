@@ -28,6 +28,7 @@ class PublicacionesSeeder extends Seeder
                 $publicacion = Publicacion::create([
                     'user_id' => $usuario->id,
                     'zona_id' => $usuario->zona_id,
+                    'zona' => $zona->nombre,
                     'titulo' => "Publicación de {$usuario->name} #{$i}",
                     'descripcion' => 'Esta es una publicación de prueba.',
                     'estado' => ['nuevo', 'usado', 'roto'][rand(0, 2)],

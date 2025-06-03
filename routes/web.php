@@ -3,11 +3,13 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicacionController;
 use App\Http\Controllers\NotificacionController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\InicioController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-// Página de bienvenida pública
+// Página pública
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
@@ -17,15 +19,13 @@ Route::get('/', function () {
     ]);
 });
 
-// Vista de inicio que muestra publicaciones públicas
-Route::get('/inicio', [PublicacionController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('inicio');
-
-// Rutas protegidas por autenticación
+// Rutas protegidas por auth
 Route::middleware('auth')->group(function () {
 
-    // Perfil de usuario
+    // Página principal después de login
+    Route::get('/inicio', [InicioController::class, 'index'])->name('inicio');
+
+    // Perfil
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -33,15 +33,18 @@ Route::middleware('auth')->group(function () {
     // Publicaciones
     Route::get('/publicaciones/crear', [PublicacionController::class, 'create'])->name('publicaciones.create');
     Route::post('/publicaciones', [PublicacionController::class, 'store'])->name('publicaciones.store');
-
-    // Ruta de detalle de publicación
-    Route::get('/publicaciones/{id}', [PublicacionController::class, 'show'])
-        ->middleware(['auth', 'verified'])
-        ->name('publicaciones.show');
+    Route::get('/publicaciones/{id}', [PublicacionController::class, 'show'])->name('publicaciones.show');
 
     // Notificaciones
     Route::get('/notificaciones', [NotificacionController::class, 'index'])->name('notificaciones.index');
-    Route::post('/notificaciones', [NotificacionController::class, 'store'])->name('notificaciones.store'); // 🆕 ESTA LÍNEA
+    Route::post('/notificaciones', [NotificacionController::class, 'store'])->name('notificaciones.store');
+
+    // Panel admin
+    // Panel admin
+    Route::middleware(['admin'])->group(function () {
+        Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
+    });
+
 });
 
 require __DIR__.'/auth.php';

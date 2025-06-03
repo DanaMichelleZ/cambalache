@@ -32,6 +32,13 @@ const showingNavigationDropdown = ref(false)
                                 <NavLink :href="route('publicaciones.create')" :active="route().current('publicaciones.create')">
                                     Crear publicación
                                 </NavLink>
+                               <NavLink
+                                v-if="$page.props.auth.user?.rol === 'admin'"
+                                :href="route('admin.index')"
+                                :active="route().current('admin.index')"
+                                >
+                                Panel Admin
+                                </NavLink>
                             </div>
                         </div>
 
@@ -90,6 +97,13 @@ const showingNavigationDropdown = ref(false)
                         </ResponsiveNavLink>
                         <ResponsiveNavLink :href="route('publicaciones.create')" :active="route().current('publicaciones.create')">
                             Crear publicación
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            v-if="$page.props.auth?.user?.rol === 'admin'"
+                            :href="route('admin.index')"
+                            :active="route().current('admin.index')"
+                        >
+                            Panel Admin
                         </ResponsiveNavLink>
                     </div>
 

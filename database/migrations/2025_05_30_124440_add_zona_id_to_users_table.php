@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->foreignId('zona_id')
-                  ->nullable()
-                  ->constrained('zonas')
-                  ->nullOnDelete();
-        });
+        // Schema::table('users', function (Blueprint $table) {
+        //     $table->foreignId('zona_id')
+        //           ->nullable()
+        //           ->constrained('zonas')
+        //           ->nullOnDelete();
+        // });
     }
 
     /**
